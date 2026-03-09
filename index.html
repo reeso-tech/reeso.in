@@ -744,19 +744,23 @@ h3{font-size:clamp(1.125rem,2vw,1.5rem);line-height:1.3;font-weight:600}
 <section class="contact" id="contact"><div class="contact-pattern"></div><div class="ct"><div class="contact-inner r">
 <h2>Packaging procurement is changing. Be early.</h2>
 <p>The brands that systematise their packaging function now will have a structural advantage in cost, quality, speed, and scale. We'd love to show you what that looks like.</p>
-<form class="contact-form" onsubmit="event.preventDefault()">
+<form class="contact-form" id="contactForm">
+<input type="hidden" name="access_key" value="fde8dc9f-2b1a-44ab-8092-39d452b9b356">
+<input type="hidden" name="subject" value="New Contact Form Submission — Reeso Website">
+<input type="hidden" name="from_name" value="Reeso Website">
 <div class="contact-row">
-<div class="contact-field"><label>Name</label><input type="text" placeholder="Your name"></div>
-<div class="contact-field"><label>Company</label><input type="text" placeholder="Your company"></div>
+<div class="contact-field"><label>Name</label><input type="text" name="name" placeholder="Your name" required></div>
+<div class="contact-field"><label>Company</label><input type="text" name="company" placeholder="Your company"></div>
 </div>
 <div class="contact-row">
-<div class="contact-field"><label>Email</label><input type="email" placeholder="you@company.com"></div>
-<div class="contact-field"><label>Phone</label><input type="tel" placeholder="+91 ..."></div>
+<div class="contact-field"><label>Email</label><input type="email" name="email" placeholder="you@company.com" required></div>
+<div class="contact-field"><label>Phone</label><input type="tel" name="phone" placeholder="+91 ..."></div>
 </div>
 <div class="contact-field"><label>What are you looking for?</label>
-<select><option value="" disabled selected>Select an option</option><option>Packaging procurement partner</option><option>Cost benchmarking</option><option>Vendor management</option><option>Artwork & prepress</option><option>Quality standardisation</option><option>Just exploring</option></select></div>
-<div class="contact-field"><label>Tell us more</label><textarea placeholder="Anything you'd like us to know — number of SKUs, current challenges, timeline..."></textarea></div>
+<select name="looking_for"><option value="" disabled selected>Select an option</option><option>Packaging procurement partner</option><option>Cost benchmarking</option><option>Vendor management</option><option>Artwork & prepress</option><option>Quality standardisation</option><option>Just exploring</option></select></div>
+<div class="contact-field"><label>Tell us more</label><textarea name="message" placeholder="Anything you'd like us to know — number of SKUs, current challenges, timeline..."></textarea></div>
 <div class="contact-submit"><button type="submit" class="btn bteal bxl" style="width:100%">Get Started with Reeso <span class="arr">→</span></button></div>
+<div id="formStatus" style="display:none;text-align:center;padding:1rem;margin-top:1rem;border-radius:12px;font-size:.95rem"></div>
 </form>
 <p class="contact-email">Or email us directly at <a href="mailto:connect@reeso.in">connect@reeso.in</a></p>
 </div></div></section>
@@ -999,6 +1003,48 @@ document.querySelectorAll('[data-row]').forEach(el=>{
   },{threshold:.3});
   const statsEl=document.querySelector('.about-stats');
   if(statsEl)io.observe(statsEl);
+})();
+
+
+// ── Contact Form — Web3Forms submission ──
+(function(){
+  const form=document.getElementById('contactForm');
+  if(!form)return;
+  const btn=form.querySelector('button[type="submit"]');
+  const status=document.getElementById('formStatus');
+  const btnText=btn.innerHTML;
+
+  form.addEventListener('submit',async function(e){
+    e.preventDefault();
+    btn.disabled=true;
+    btn.innerHTML='Sending…';
+    status.style.display='none';
+
+    try{
+      const res=await fetch('https://api.web3forms.com/submit',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body:JSON.stringify(Object.fromEntries(new FormData(form)))
+      });
+      const data=await res.json();
+      if(data.success){
+        status.style.display='block';
+        status.style.background='rgba(52,198,184,0.15)';
+        status.style.color='#34C6B8';
+        status.textContent="Thank you! We'll be in touch shortly.";
+        form.reset();
+      }else{
+        throw new Error(data.message||'Submission failed');
+      }
+    }catch(err){
+      status.style.display='block';
+      status.style.background='rgba(255,80,80,0.15)';
+      status.style.color='#ff5050';
+      status.textContent='Something went wrong. Please email us at connect@reeso.in';
+    }
+    btn.disabled=false;
+    btn.innerHTML=btnText;
+  });
 })();
 </script>
 </body>
